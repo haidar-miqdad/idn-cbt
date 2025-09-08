@@ -35,33 +35,25 @@ class HandleInertiaRequests extends Middleware
      *
      * @return array<string, mixed>
      */
-    public function share(Request $request): array
+   public function share(Request $request): array
     {
-        [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+    return [
+        ...parent::share($request),
+        //
 
-        return [
-            ...parent::share($request),
-            'name' => config('app.name'),
-            'quote' => ['message' => trim($message), 'author' => trim($author)],
+        //session
+        'session' => [
+            'status'    => fn () => $request->session()->get('status'),
+            'success'   => fn () => $request->session()->get('success'),
+            'error'     => fn () => $request->session()->get('error'),
+        ],
+        //user authenticated
+        'auth'  =>[
+            'user'          => auth()->user() ?   auth()->user() : null,
+        ],
 
-            // session
-            'session' => [
-                'status' => fn () => $request->session()->get('status'),
-                'success' => fn () => $request->session()->get('success'),
-                'error' => fn () => $request->session()->get('error'),
-            ],
-
-            //user authenticated
-            'auth'  =>[
-                'user'   => auth()->user() ? auth()->user() : null,
-            ],
-            'ziggy' => [
-                ...(new Ziggy)->toArray(),
-                'location' => $request->url(),
-            ],
-
-                    //session
-
-        ];
-    }
+        //api key tinymce
+        'TinyMCEApiKey' => config('tinymce.api_key'),
+    ];
+}
 }
